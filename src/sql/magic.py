@@ -514,20 +514,20 @@ class SqlMagic(Magics, Configurable):
         if not command.sql:
             return
 
-        # store the query if needed
-        if args.save:
-            if "-" in args.save:
-                warnings.warn(
-                    "Using hyphens will be deprecated soon, "
-                    "please use "
-                    + str(args.save.replace("-", "_"))
-                    + " instead for the save argument.",
-                    FutureWarning,
-                )
-            self._store.store(args.save, command.sql_original, with_=with_)
 
         if args.no_execute:
             display.message("Skipping execution...")
+            # store the query if needed
+            if args.save:
+                if "-" in args.save:
+                    warnings.warn(
+                        "Using hyphens will be deprecated soon, "
+                        "please use "
+                        + str(args.save.replace("-", "_"))
+                        + " instead for the save argument.",
+                        FutureWarning,
+                    )
+                self._store.store(args.save, command.sql_original, with_=with_)
             return
 
         try:
@@ -537,7 +537,7 @@ class SqlMagic(Magics, Configurable):
                 self,
                 parameters=user_ns if self.named_parameters else None,
             )
-
+            ret_val = None
             if (
                 result is not None
                 and not isinstance(result, str)
@@ -568,8 +568,21 @@ class SqlMagic(Magics, Configurable):
                     return None
 
                 # Return results into the default ipython _ variable
-                return result
+                ret_val = result
 
+            # store the query if needed
+            if args.save:
+                if "-" in args.save:
+                    warnings.warn(
+                        "Using hyphens will be deprecated soon, "
+                        "please use "
+                        + str(args.save.replace("-", "_"))
+                        + " instead for the save argument.",
+                        FutureWarning,
+                    )
+                self._store.store(args.save, command.sql_original, with_=with_)
+
+            return ret_val
         # JA: added DatabaseError for MySQL
         except (
             ProgrammingError,
