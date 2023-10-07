@@ -514,7 +514,6 @@ class SqlMagic(Magics, Configurable):
         if not command.sql:
             return
 
-
         if args.no_execute:
             display.message("Skipping execution...")
             # store the query if needed
